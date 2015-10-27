@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Canvas tutorial</title>
+    <script type="text/javascript">
+
+        function init() {
+            /* Basic coordinates / sizes */
+            var canvas = document.getElementById('hero'),
+                ctx = canvas.getContext('2d'),
+                w = canvas.width,
+                h = canvas.height,
+                center = {
+                    x: w / 2,
+                    y: h / 2
+                };
+
+            /* Define some colors */
+            var COLORS = {
+                blue: 'rgba(0,0,170,1',
+                darkBlue: 'rgba(0,0,120,1)',
+                electricBlue: 'rgba(8,30,222,1)',
+                orange: 'rgba(252,110,33,1)'
+            };
+
+
+            // I want 6 orbits, starting at 100px, evenly distributed to the width
+            // Solve for  ( x * i + 100 )
+            var orbits = 6,
+                firstOrbit = 100,
+                spacing = (w / 2) / orbits;
+
+            var satellites = [],
+                currencies = ['$', '¢', '£', '¥', '₡', '€', '₱'];
+
+            for (var i = 0; i < orbits; i++) {
+                var type = currencies[Math.floor(Math.random() * currencies.length)],
+                    size = 15 + Math.floor(Math.random() * 25), //(15 - 40)
+
+                //Create a random shape satellite
+                    satellite = function (type, size) {
+                        return {
+                            draw: function () {
+                                ctx.font = size + 'px serif';
+                                ctx.strokeText(type, 0, 0);
+                            }
+                        }
+                    }(type, size);
+
+                satellites.push(satellite);
+            }
+
+            function draw() {
+                var time = new Date();
+
+
+                /* Draw a cool gradient background */
+                var radgrad = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, Math.max(w, h));
+                radgrad.addColorStop(0, COLORS.blue);
+                radgrad.addColorStop(.6, COLORS.darkBlue);
+                ctx.fillStyle = radgrad;
+                ctx.fillRect(0, 0, 1000, 500);
+
+                /* Draw some orbits */
+                for (var i = 0; i < orbits; i++) {
+                    var radius = (spacing * i) + firstOrbit,
+                        speed = 4.0 / (i + 1); // Magic speed number.
+
+                    ctx.beginPath();
+                    ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+                    ctx.strokeStyle = COLORS.electricBlue;
+                    ctx.stroke();
+
+                    /* Draw the satellites */
+                    ctx.save()
+
+                    //Recenter Center the canvas
+                    ctx.translate(center.x, center.y);
+
+                    //Update satellite orbit
+                    ctx.rotate((((2 * Math.PI) / 60.0) * time.getSeconds() + ((2 * Math.PI) / 60000.0) * time.getMilliseconds()) * speed);
+
+                    //Move out to radius
+                    ctx.translate(radius, 0);
+
+                    //Set color
+                    ctx.strokeStyle = COLORS.orange;
+
+                    //Rotation of satellite
+                    ctx.rotate((((2 * Math.PI) / 60.0) * time.getSeconds() + ((2 * Math.PI) / 60000.0) * time.getMilliseconds()) * speed * 2);
+
+                    //Finally, draw it.
+                    satellites[i].draw();
+                    ctx.restore();
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+    </script>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* to remove the top and left whitespace */
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* just to be sure these are full screen*/
+
+        canvas {
+            display: block;
+        }
+
+        /* To remove the scrollbars */
+    </style>
+</head>
+<body onload="init();">
+<canvas id="hero" width="1000" height="500"></canvas>
+</body>
+</html>
